@@ -1,0 +1,47 @@
+provider "aws" {
+  region = "ap-south-1"
+access_key = "AKIASK65QSUXKVNPL7M3"
+secret_key = "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"
+}
+resource "aws_iam_user" "use" {
+count = length(var.user)
+name = var.user [count.index]
+}
+
+variable "user" {
+type = list(string)
+default = ["user1", "user2", "user3"]
+}
+   
+resource "aws_iam_group" "grou" {
+name = "my_group"
+}
+resource "aws_iam_policy" "example_policy" {
+  name        = "example-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+
+        "ec2:Describe*",
+              }
+    ]
+  })
+}
+resource "aws_iam_group_membership" "iam_group_membership" {
+group = "my_group"
+  for_each = toset(var.user)
+
+  name = aws_iam_group.grou.name
+  users = [
+    each.value
+  ]
+}
+
+resource "aws_iam_group_policy_attachment" "example_attachment" {
+ policy_arn = aws_iam_policy.example_policy.arn
+  group      = aws_iam_group.grou.name
+}
